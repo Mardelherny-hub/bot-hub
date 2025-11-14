@@ -39,7 +39,11 @@ Route::middleware(['auth', 'tenant.resolver', 'role:admin|supervisor'])
         
         // Configuración de bots
         // Route::get('bots/{bot}/configure', [Tenant\BotController::class, 'configure'])->name('bots.configure');
-        
+        // Gestionar usuarios del bot (Livewire)
+        Route::get('bots/{bot}/users', function (App\Models\Bot $bot) {
+            return view('tenant.bots.manage-users', compact('bot'));
+        })->name('bots.manage-users');
+
         // Gestión de Usuarios del tenant
         // Route::resource('users', Tenant\UserController::class);
         
