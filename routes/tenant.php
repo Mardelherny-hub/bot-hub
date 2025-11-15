@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Tenant\BotController;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -34,30 +35,38 @@ Route::middleware(['auth', 'tenant.resolver', 'role:admin|supervisor'])
             return view('tenant.dashboard', compact('tenant'));
         })->name('dashboard');
         
-        // Gestión de Bots (CRUD)
-        // Route::resource('bots', Tenant\BotController::class);
-        
-        // Configuración de bots
-        // Route::get('bots/{bot}/configure', [Tenant\BotController::class, 'configure'])->name('bots.configure');
-        // Gestionar usuarios del bot (Livewire)
-        Route::get('bots/{bot}/users', function (App\Models\Bot $bot) {
-            return view('tenant.bots.manage-users', compact('bot'));
-        })->name('bots.manage-users');
+        /*
+        |--------------------------------------------------------------------------
+        | Gestión de Bots
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('bots', BotController::class);
 
-        // Gestión de Usuarios del tenant
+        // Acciones adicionales para bots
+        Route::prefix('bots')->name('bots.')->group(function () {
+            // Activar bot
+            Route::post('{bot}/activate', [BotController::class, 'activate'])
+                ->name('activate');
+
+            // Desactivar bot
+            Route::post('{bot}/deactivate', [BotController::class, 'deactivate'])
+                ->name('deactivate');
+        });
+        
+        // Gestionar usuarios del bot (Livewire) - Sprint futuro
+        // Route::get('bots/{bot}/users', function (App\Models\Bot $bot) {
+        //     return view('tenant.bots.manage-users', compact('bot'));
+        // })->name('bots.manage-users');
+
+        // Gestión de Usuarios del tenant - Sprint futuro
         // Route::resource('users', Tenant\UserController::class);
         
-        // Asignar usuarios a bots con permisos
-        // Route::post('bots/{bot}/assign-user', [Tenant\BotController::class, 'assignUser'])->name('bots.assign-user');
-        
-        // Knowledge Base
+        // Knowledge Base - Sprint 3
         // Route::resource('bots/{bot}/knowledge-base', Tenant\KnowledgeBaseController::class);
         
-        // Analytics del tenant
+        // Analytics del tenant - Sprint 4
         // Route::get('analytics', [Tenant\AnalyticsController::class, 'index'])->name('analytics');
         
-        // Billing y suscripción
+        // Billing y suscripción - Post-MVP
         // Route::get('billing', [Tenant\BillingController::class, 'index'])->name('billing');
-        
-        // NOTA: Controladores se crearán en Sprint 1
     });
