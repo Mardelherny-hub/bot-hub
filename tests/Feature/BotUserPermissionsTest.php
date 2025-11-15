@@ -9,19 +9,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
-/**
- * BotUserPermissionsTest
- * 
- * Tests específicos para la tabla pivot bot_user y permisos granulares.
- * 
- * COBERTURA:
- * - Asignación de usuarios a bots
- * - Actualización de permisos
- * - Métodos helper del modelo BotUser
- * - Métodos de User para verificar permisos
- * - Factory states (fullAccess, chatOnly, etc)
- */
+
 class BotUserPermissionsTest extends TestCase
 {
     use RefreshDatabase;
@@ -42,7 +32,7 @@ class BotUserPermissionsTest extends TestCase
         $this->user->assignRole('agent');
     }
 
-    /** @test */
+    #[Test]
     public function can_assign_user_to_bot_with_custom_permissions()
     {
         $this->bot->users()->attach($this->user->id, [
@@ -64,7 +54,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertFalse($pivot->can_delete_data);
     }
 
-    /** @test */
+    #[Test]
     public function can_update_user_permissions_on_existing_assignment()
     {
         // Asignar con permisos iniciales
@@ -86,7 +76,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertTrue($pivot->can_chat);
     }
 
-    /** @test */
+    #[Test]
     public function can_remove_user_from_bot()
     {
         $this->bot->users()->attach($this->user->id);
@@ -100,7 +90,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertFalse($this->bot->users->contains($this->user->id));
     }
 
-    /** @test */
+    #[Test]
     public function bot_user_factory_full_access_state_works()
     {
         $botUser = BotUser::factory()->fullAccess()->create([
@@ -115,7 +105,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertTrue($botUser->can_delete_data);
     }
 
-    /** @test */
+    #[Test]
     public function bot_user_factory_chat_only_state_works()
     {
         $botUser = BotUser::factory()->chatOnly()->create([
@@ -130,7 +120,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertFalse($botUser->can_delete_data);
     }
 
-    /** @test */
+    #[Test]
     public function bot_user_factory_read_only_state_works()
     {
         $botUser = BotUser::factory()->readOnly()->create([
@@ -145,7 +135,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertFalse($botUser->can_delete_data);
     }
 
-    /** @test */
+    #[Test]
     public function bot_user_factory_supervisor_state_works()
     {
         $botUser = BotUser::factory()->supervisor()->create([
@@ -160,7 +150,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertFalse($botUser->can_delete_data);
     }
 
-    /** @test */
+    #[Test]
     public function bot_user_has_all_permissions_method_works()
     {
         $botUser = BotUser::factory()->fullAccess()->create([
@@ -175,7 +165,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertFalse($botUser->hasAllPermissions());
     }
 
-    /** @test */
+    #[Test]
     public function bot_user_has_any_permission_method_works()
     {
         $botUser = BotUser::factory()->noPermissions()->create([
@@ -190,7 +180,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertTrue($botUser->hasAnyPermission());
     }
 
-    /** @test */
+    #[Test]
     public function bot_user_grant_all_permissions_method_works()
     {
         $botUser = BotUser::factory()->noPermissions()->create([
@@ -205,7 +195,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertTrue($botUser->fresh()->hasAllPermissions());
     }
 
-    /** @test */
+    #[Test]
     public function bot_user_revoke_all_permissions_method_works()
     {
         $botUser = BotUser::factory()->fullAccess()->create([
@@ -220,7 +210,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertFalse($botUser->fresh()->hasAnyPermission());
     }
 
-    /** @test */
+    #[Test]
     public function user_can_manage_bot_method_works()
     {
         BotUser::factory()->create([
@@ -234,7 +224,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertTrue($this->user->canManageBot($this->bot));
     }
 
-    /** @test */
+    #[Test]
     public function user_can_chat_in_bot_method_works()
     {
         BotUser::factory()->create([
@@ -248,7 +238,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertTrue($this->user->canChatInBot($this->bot));
     }
 
-    /** @test */
+    #[Test]
     public function user_can_view_analytics_method_works()
     {
         BotUser::factory()->create([
@@ -262,7 +252,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertTrue($this->user->canViewAnalytics($this->bot));
     }
 
-    /** @test */
+    #[Test]
     public function user_can_train_knowledge_base_method_works()
     {
         BotUser::factory()->create([
@@ -276,7 +266,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertTrue($this->user->canTrainKnowledgeBase($this->bot));
     }
 
-    /** @test */
+    #[Test]
     public function user_without_permissions_returns_false_for_all_checks()
     {
         BotUser::factory()->noPermissions()->create([
@@ -292,7 +282,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertFalse($this->user->canTrainKnowledgeBase($this->bot));
     }
 
-    /** @test */
+    #[Test]
     public function assigned_at_timestamp_is_set_correctly()
     {
         $now = now();
@@ -306,7 +296,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertEquals($now->format('Y-m-d H:i:s'), $botUser->assigned_at->format('Y-m-d H:i:s'));
     }
 
-    /** @test */
+    #[Test]
     public function can_query_bots_with_pivot_data()
     {
         BotUser::factory()->create([
@@ -326,7 +316,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertEquals($this->bot->id, $userBots->first()->id);
     }
 
-    /** @test */
+    #[Test]
     public function multiple_users_can_be_assigned_to_same_bot()
     {
         $user2 = User::factory()->create(['tenant_id' => $this->tenant->id]);
@@ -350,7 +340,7 @@ class BotUserPermissionsTest extends TestCase
         $this->assertCount(3, $this->bot->users);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_be_assigned_to_multiple_bots()
     {
         $bot2 = Bot::factory()->create(['tenant_id' => $this->tenant->id]);

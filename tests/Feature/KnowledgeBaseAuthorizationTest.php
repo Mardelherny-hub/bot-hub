@@ -10,21 +10,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
-/**
- * KnowledgeBaseAuthorizationTest
- * 
- * Tests de autorización para operaciones sobre Knowledge Bases.
- * 
- * COBERTURA:
- * - Autorización por roles
- * - Autorización por permiso can_train_kb (crítico)
- * - Autorización por permiso can_delete_data
- * - Aislamiento por tenant
- * 
- * IMPORTANTE: Entrenar KB es una operación sensible que afecta
- * las respuestas del bot, por eso tiene permisos estrictos.
- */
+
 class KnowledgeBaseAuthorizationTest extends TestCase
 {
     use RefreshDatabase;
@@ -55,7 +43,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->kb2 = KnowledgeBase::factory()->create(['bot_id' => $this->bot2->id]);
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_can_view_any_knowledge_base()
     {
         $superAdmin = User::factory()->create();
@@ -65,7 +53,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertTrue($superAdmin->can('view', $this->kb2));
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_view_knowledge_bases_from_their_tenant()
     {
         $admin = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -75,7 +63,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertFalse($admin->can('view', $this->kb2));
     }
 
-    /** @test */
+    #[Test]
     public function supervisor_can_view_knowledge_bases_from_their_tenant()
     {
         $supervisor = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -85,7 +73,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertFalse($supervisor->can('view', $this->kb2));
     }
 
-    /** @test */
+    #[Test]
     public function agent_with_bot_access_can_view_knowledge_base()
     {
         $agent = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -103,7 +91,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertTrue($agent->can('view', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function agent_without_bot_access_cannot_view_knowledge_base()
     {
         $agent = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -112,7 +100,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertFalse($agent->can('view', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function only_admin_and_super_admin_can_create_knowledge_base()
     {
         $superAdmin = User::factory()->create();
@@ -129,7 +117,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertFalse($agent->can('create', KnowledgeBase::class));
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_update_knowledge_base_configuration()
     {
         $admin = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -139,7 +127,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertFalse($admin->can('update', $this->kb2));
     }
 
-    /** @test */
+    #[Test]
     public function user_with_can_manage_on_bot_can_update_knowledge_base()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -156,7 +144,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertTrue($user->can('update', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function only_admin_and_super_admin_can_delete_knowledge_base()
     {
         $superAdmin = User::factory()->create();
@@ -173,7 +161,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertFalse($agent->can('delete', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_train_knowledge_base()
     {
         $admin = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -182,7 +170,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertTrue($admin->can('train', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function user_with_can_train_kb_permission_can_train_knowledge_base()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -199,7 +187,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertTrue($user->can('train', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function user_without_can_train_kb_permission_cannot_train_knowledge_base()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -217,7 +205,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertFalse($user->can('train', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function supervisor_cannot_train_knowledge_base_by_default()
     {
         $supervisor = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -227,7 +215,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertFalse($supervisor->can('train', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function any_user_with_bot_access_can_view_documents()
     {
         $agent = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -244,7 +232,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertTrue($agent->can('viewDocuments', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function user_with_can_delete_data_can_delete_documents()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -261,7 +249,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertTrue($user->can('deleteDocuments', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function user_with_can_train_kb_can_delete_documents()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -280,7 +268,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertTrue($user->can('deleteDocuments', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function user_without_delete_permissions_cannot_delete_documents()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -299,7 +287,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertFalse($user->can('deleteDocuments', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function any_user_with_bot_access_can_download_documents()
     {
         $agent = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -316,7 +304,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertTrue($agent->can('downloadDocuments', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_view_metrics()
     {
         $admin = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -325,7 +313,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertTrue($admin->can('viewMetrics', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function supervisor_can_view_metrics()
     {
         $supervisor = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -334,7 +322,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertTrue($supervisor->can('viewMetrics', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function user_with_can_view_analytics_can_view_metrics()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -351,7 +339,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertTrue($user->can('viewMetrics', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function user_without_can_view_analytics_cannot_view_metrics()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -369,7 +357,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertFalse($user->can('viewMetrics', $this->kb1));
     }
 
-    /** @test */
+    #[Test]
     public function user_cannot_access_knowledge_base_from_different_tenant()
     {
         $admin = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -381,7 +369,7 @@ class KnowledgeBaseAuthorizationTest extends TestCase
         $this->assertFalse($admin->can('deleteDocuments', $this->kb2));
     }
 
-    /** @test */
+    #[Test]
     public function only_super_admin_can_force_delete_knowledge_base()
     {
         $superAdmin = User::factory()->create();

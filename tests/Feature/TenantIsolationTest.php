@@ -8,17 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * TenantIsolationTest
- * 
- * Verifica que el sistema multi-tenant funciona correctamente:
- * 1. TenantScope filtra queries automáticamente
- * 2. Usuarios solo ven datos de su tenant
- * 3. Super admin puede ver todos los tenants
- * 4. Datos no se mezclan entre tenants
- * 
- * CRÍTICO: Si alguno de estos tests falla, hay una brecha de seguridad.
- */
+
 class TenantIsolationTest extends TestCase
 {
     use RefreshDatabase;
@@ -33,11 +23,7 @@ class TenantIsolationTest extends TestCase
         Role::create(['name' => 'agent']);
     }
 
-    /**
-     * Test: Usuarios solo pueden ver otros usuarios de su tenant
-     * 
-     * @test
-     */
+
     public function users_can_only_see_their_tenant_users()
     {
         // Arrange: Crear 2 tenants con usuarios
@@ -61,11 +47,7 @@ class TenantIsolationTest extends TestCase
         $this->assertFalse($users->contains($user3));
     }
 
-    /**
-     * Test: Super admin puede ver todos los usuarios
-     * 
-     * @test
-     */
+
     public function super_admin_can_see_all_users()
     {
         // Arrange: Crear tenants y usuarios
@@ -86,11 +68,7 @@ class TenantIsolationTest extends TestCase
         $this->assertCount(3, $allUsers);
     }
 
-    /**
-     * Test: Tenant tiene la cantidad correcta de usuarios
-     * 
-     * @test
-     */
+
     public function tenant_has_correct_user_count()
     {
         // Arrange
@@ -105,11 +83,7 @@ class TenantIsolationTest extends TestCase
         $this->assertEquals(2, $tenant2->users()->count());
     }
 
-    /**
-     * Test: Usuario pertenece al tenant correcto
-     * 
-     * @test
-     */
+
     public function user_belongs_to_correct_tenant()
     {
         // Arrange
@@ -122,11 +96,6 @@ class TenantIsolationTest extends TestCase
         $this->assertEquals('Test Tenant', $user->tenant->name);
     }
 
-    /**
-     * Test: Super admin no tiene tenant
-     * 
-     * @test
-     */
     public function super_admin_has_no_tenant()
     {
         // Arrange
@@ -139,11 +108,7 @@ class TenantIsolationTest extends TestCase
         $this->assertTrue($superAdmin->isSuperAdmin());
     }
 
-    /**
-     * Test: No se puede acceder a usuarios de otro tenant
-     * 
-     * @test
-     */
+
     public function cannot_access_other_tenant_users()
     {
         // Arrange
@@ -161,11 +126,7 @@ class TenantIsolationTest extends TestCase
         $this->assertNull($foundUser);
     }
 
-    /**
-     * Test: Scope forTenant filtra correctamente
-     * 
-     * @test
-     */
+   
     public function scope_for_tenant_filters_correctly()
     {
         // Arrange
@@ -189,11 +150,7 @@ class TenantIsolationTest extends TestCase
         });
     }
 
-    /**
-     * Test: Tenant puede verificar si puede crear más bots
-     * 
-     * @test
-     */
+   
     public function tenant_can_check_bot_creation_limit()
     {
         $this->markTestSkipped('Bot model will be created in Sprint 1');
@@ -208,11 +165,7 @@ class TenantIsolationTest extends TestCase
         $this->assertEquals(3, $tenant->remaining_bot_slots);
     }
 
-    /**
-     * Test: Tenant puede verificar si puede agregar más usuarios
-     * 
-     * @test
-     */
+   
     public function tenant_can_check_user_limit()
     {
         // Arrange
@@ -237,11 +190,6 @@ class TenantIsolationTest extends TestCase
         $this->assertEquals(0, $tenant->remaining_user_slots);
     }
 
-    /**
-     * Test: Tenant verifica suscripción activa
-     * 
-     * @test
-     */
     public function tenant_can_verify_active_subscription()
     {
         // Arrange: Tenant activo
@@ -259,11 +207,7 @@ class TenantIsolationTest extends TestCase
         $this->assertFalse($suspendedTenant->hasActiveSubscription());
     }
 
-    /**
-     * Test: Scope active filtra tenants activos
-     * 
-     * @test
-     */
+    
     public function scope_active_filters_active_tenants()
     {
         // Arrange

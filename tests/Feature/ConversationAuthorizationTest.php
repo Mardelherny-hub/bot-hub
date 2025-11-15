@@ -10,18 +10,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
-/**
- * ConversationAuthorizationTest
- * 
- * Tests de autorización para operaciones sobre Conversations.
- * 
- * COBERTURA:
- * - Autorización por roles
- * - Autorización por asignación (assigned_user_id)
- * - Autorización por acceso al bot
- * - Aislamiento por tenant
- */
+
 class ConversationAuthorizationTest extends TestCase
 {
     use RefreshDatabase;
@@ -57,7 +48,7 @@ class ConversationAuthorizationTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_can_view_any_conversation()
     {
         $superAdmin = User::factory()->create();
@@ -67,7 +58,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertTrue($superAdmin->can('view', $this->conversation2));
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_view_all_conversations_from_their_tenant()
     {
         $admin = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -77,7 +68,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertFalse($admin->can('view', $this->conversation2));
     }
 
-    /** @test */
+    #[Test]
     public function supervisor_can_view_all_conversations_from_their_tenant()
     {
         $supervisor = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -87,7 +78,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertFalse($supervisor->can('view', $this->conversation2));
     }
 
-    /** @test */
+    #[Test]
     public function agent_can_view_assigned_conversation()
     {
         $agent = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -99,7 +90,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertTrue($agent->can('view', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function agent_can_view_conversation_if_has_access_to_bot()
     {
         $agent = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -117,7 +108,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertTrue($agent->can('view', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function agent_cannot_view_conversation_without_bot_access()
     {
         $agent = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -126,7 +117,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertFalse($agent->can('view', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_update_any_conversation_in_their_tenant()
     {
         $admin = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -136,7 +127,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertFalse($admin->can('update', $this->conversation2));
     }
 
-    /** @test */
+    #[Test]
     public function supervisor_can_update_conversations_in_their_tenant()
     {
         $supervisor = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -145,7 +136,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertTrue($supervisor->can('update', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function user_with_can_manage_on_bot_can_update_conversation()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -162,7 +153,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertTrue($user->can('update', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_delete_conversations_in_their_tenant()
     {
         $admin = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -171,7 +162,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertTrue($admin->can('delete', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function user_with_can_delete_data_permission_can_delete_conversation()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -188,7 +179,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertTrue($user->can('delete', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function user_without_can_delete_data_permission_cannot_delete_conversation()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -206,7 +197,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertFalse($user->can('delete', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function assigned_user_can_reply_to_conversation()
     {
         $agent = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -217,7 +208,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertTrue($agent->can('reply', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function user_with_can_chat_permission_can_reply_to_conversation()
     {
         $agent = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -234,7 +225,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertTrue($agent->can('reply', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function user_without_can_chat_permission_cannot_reply_to_conversation()
     {
         $agent = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -252,7 +243,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertFalse($agent->can('reply', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_assign_conversation_to_agent()
     {
         $admin = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -261,7 +252,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertTrue($admin->can('assign', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function supervisor_can_assign_conversation_to_agent()
     {
         $supervisor = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -270,7 +261,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertTrue($supervisor->can('assign', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function user_with_can_manage_on_bot_can_assign_conversation()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -287,7 +278,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertTrue($user->can('assign', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function regular_agent_cannot_assign_conversations()
     {
         $agent = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -297,14 +288,19 @@ class ConversationAuthorizationTest extends TestCase
             'bot_id' => $this->bot1->id,
             'user_id' => $agent->id,
             'can_chat' => true,
+            'can_manage' => false,
         ]);
 
         $agent->refresh();
 
+        // DEBUG TEMPORAL
+        dump($agent->canManageBot($this->conversation1->bot));
+        dump($agent->can('assign', $this->conversation1));
+
         $this->assertFalse($agent->can('assign', $this->conversation1));
     }
 
-    /** @test */
+    #[Test]
     public function user_cannot_access_conversation_from_different_tenant()
     {
         $admin = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -317,7 +313,7 @@ class ConversationAuthorizationTest extends TestCase
         $this->assertFalse($admin->can('reply', $this->conversation2));
     }
 
-    /** @test */
+    #[Test]
     public function only_super_admin_can_force_delete_conversation()
     {
         $superAdmin = User::factory()->create();

@@ -10,20 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * BotAuthorizationTest
- * 
- * Tests de autorización para operaciones sobre Bots.
- * 
- * COBERTURA:
- * - Autorización por roles (super_admin, admin, supervisor, agent, viewer)
- * - Autorización por permisos granulares (pivot bot_user)
- * - Aislamiento por tenant
- * - Combinación de roles + permisos
- * 
- * IMPORTANTE: Cada test verifica que las policies funcionan correctamente
- * y que el aislamiento multi-tenant se mantiene.
- */
+
 class BotAuthorizationTest extends TestCase
 {
     use RefreshDatabase;
@@ -60,7 +47,6 @@ class BotAuthorizationTest extends TestCase
         ]);
     }
 
-    /** @test */
     public function super_admin_can_view_any_bot()
     {
         $superAdmin = User::factory()->create();
@@ -70,7 +56,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertTrue($superAdmin->can('view', $this->bot2));
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_view_bots_from_their_tenant()
     {
         $admin = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -80,7 +66,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertFalse($admin->can('view', $this->bot2));
     }
 
-    /** @test */
+    #[Test]
     public function admin_cannot_view_bots_from_other_tenant()
     {
         $admin = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -89,7 +75,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertFalse($admin->can('view', $this->bot2));
     }
 
-    /** @test */
+    #[Test]
     public function supervisor_can_view_all_bots_from_their_tenant()
     {
         $supervisor = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -99,7 +85,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertFalse($supervisor->can('view', $this->bot2));
     }
 
-    /** @test */
+    #[Test]
     public function agent_can_only_view_assigned_bots()
     {
         $agent = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -122,7 +108,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertTrue($agent->can('view', $this->bot1));
     }
 
-    /** @test */
+    #[Test]
     public function only_admin_and_super_admin_can_create_bots()
     {
         $superAdmin = User::factory()->create();
@@ -139,7 +125,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertFalse($agent->can('create', Bot::class));
     }
 
-    /** @test */
+    #[Test]
     public function user_with_can_manage_permission_can_update_bot()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -161,7 +147,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertTrue($user->can('update', $this->bot1));
     }
 
-    /** @test */
+    #[Test]
     public function user_without_can_manage_permission_cannot_update_bot()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -180,7 +166,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertFalse($user->can('update', $this->bot1));
     }
 
-    /** @test */
+    #[Test]
     public function user_with_can_chat_permission_can_chat_in_bot()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -198,7 +184,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertTrue($user->can('chat', $this->bot1));
     }
 
-    /** @test */
+    #[Test]
     public function user_without_can_chat_permission_cannot_chat_in_bot()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -217,7 +203,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertFalse($user->can('chat', $this->bot1));
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_view_analytics_of_any_bot_in_their_tenant()
     {
         $admin = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -227,7 +213,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertFalse($admin->can('viewAnalytics', $this->bot2));
     }
 
-    /** @test */
+    #[Test]
     public function supervisor_can_view_analytics_of_any_bot_in_their_tenant()
     {
         $supervisor = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -236,7 +222,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertTrue($supervisor->can('viewAnalytics', $this->bot1));
     }
 
-    /** @test */
+    #[Test]
     public function user_with_can_view_analytics_permission_can_view_analytics()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -254,7 +240,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertTrue($user->can('viewAnalytics', $this->bot1));
     }
 
-    /** @test */
+    #[Test]
     public function user_with_can_train_kb_permission_can_train_knowledge_base()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -272,7 +258,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertTrue($user->can('trainKnowledgeBase', $this->bot1));
     }
 
-    /** @test */
+    #[Test]
     public function user_without_can_train_kb_permission_cannot_train_knowledge_base()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -291,7 +277,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertFalse($user->can('trainKnowledgeBase', $this->bot1));
     }
 
-    /** @test */
+    #[Test]
     public function only_admin_and_super_admin_can_delete_bots()
     {
         $superAdmin = User::factory()->create();
@@ -317,7 +303,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertTrue($agent->can('delete', $this->bot1)); // can_manage permite delete
     }
 
-    /** @test */
+    #[Test]
     public function only_admin_and_super_admin_can_manage_bot_users()
     {
         $superAdmin = User::factory()->create();
@@ -334,7 +320,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertFalse($agent->can('manageUsers', $this->bot1));
     }
 
-    /** @test */
+    #[Test]
     public function user_can_have_different_permissions_for_different_bots()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -369,7 +355,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertTrue($user->can('trainKnowledgeBase', $bot2));
     }
 
-    /** @test */
+    #[Test]
     public function gates_work_correctly_for_bot_permissions()
     {
         $user = User::factory()->create(['tenant_id' => $this->tenant1->id]);
@@ -391,7 +377,7 @@ class BotAuthorizationTest extends TestCase
         $this->assertFalse(\Gate::allows('train-bot-kb', $this->bot1));
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_bypasses_all_gates_and_policies()
     {
         $superAdmin = User::factory()->create();
