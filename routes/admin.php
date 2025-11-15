@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\TenantController;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -31,8 +32,28 @@ Route::middleware(['auth', 'role:super_admin'])
             return view('admin.dashboard');
         })->name('dashboard');
         
-        // Gestión de Tenants (CRUD completo)
-        // Route::resource('tenants', Admin\TenantController::class);
+          /*
+        |--------------------------------------------------------------------------
+        | Gestión de Tenants
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('tenants', TenantController::class);
+
+        // Acciones adicionales para tenants
+        Route::prefix('tenants')->name('tenants.')->group(function () {
+            // Restaurar tenant eliminado (soft delete)
+            Route::post('{id}/restore', [TenantController::class, 'restore'])
+                ->name('restore')
+                ->withTrashed();
+
+            // Suspender suscripción de un tenant
+            Route::post('{tenant}/suspend', [TenantController::class, 'suspend'])
+                ->name('suspend');
+
+            // Reactivar suscripción de un tenant
+            Route::post('{tenant}/activate', [TenantController::class, 'activate'])
+                ->name('activate');
+        });
         
         // Gestión de Usuarios globales
         // Route::resource('users', Admin\UserController::class);

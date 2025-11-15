@@ -41,6 +41,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Registrar middleware de tenant con alias
         $middleware->alias([
             'tenant.resolver' => TenantResolver::class,
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
 
         // Aplicar tenant.resolver a todas las rutas web autenticadas
