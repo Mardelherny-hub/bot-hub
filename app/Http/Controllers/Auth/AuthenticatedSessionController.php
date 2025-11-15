@@ -21,6 +21,10 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Handle an incoming authentication request.
+     * 
+     * Redirección inteligente según tipo de usuario:
+     * - Super Admin (sin tenant_id) → admin.dashboard
+     * - Usuarios con tenant_id (admin, supervisor, agent) → tenant.dashboard
      */
     public function store(LoginRequest $request): RedirectResponse
     {
@@ -28,21 +32,21 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // Redirección inteligente según el rol del usuario
         $user = auth()->user();
 
-        // Super Admin → admin.dashboard
+        // Super Admin → admin.dashboard (acceso global)
         if ($user->hasRole('super_admin')) {
             return redirect()->route('admin.dashboard');
         }
 
-        // Admin o Supervisor → tenant.dashboard
-        if ($user->hasRole(['admin', 'supervisor'])) {
+        // TODOS los usuarios con tenant_id → tenant.dashboard
+        // Incluye: admin, supervisor, agent, viewer
+        if ($user->tenant_id) {
             return redirect()->route('tenant.dashboard');
         }
 
-        // Agente o Viewer → agent.dashboard
-        return redirect()->route('agent.dashboard');
+        // Fallback (no debería llegar aquí en condiciones normales)
+        return redirect('/');
     }
 
     /**

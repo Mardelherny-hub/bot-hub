@@ -4,53 +4,55 @@ use App\Http\Controllers\Tenant\BotController;
 use Illuminate\Support\Facades\Route;
 
 /**
- * Rutas de Admin de Tenant
+ * Rutas de Tenant
  * 
- * ACCESO: Usuarios con rol 'admin' dentro de su tenant
+ * ACCESO: Usuarios autenticados que pertenecen a un tenant
  * 
- * CARACTERÍSTICAS:
- * - Gestión completa de su tenant (bots, usuarios, KB)
- * - Ver analytics de todos los bots de su tenant
- * - Configuración del tenant
- * - Gestión de suscripción y billing
+ * ESTRUCTURA:
+ * - Dashboard: admin, supervisor, agent (todos los roles de tenant)
+ * - Gestión de bots: solo admin y supervisor
  * 
  * MIDDLEWARE:
  * - auth: Usuario autenticado
  * - tenant.resolver: Valida tenant y lo setea en contexto
- * - role:admin|supervisor: Solo admin o supervisor del tenant
- * 
- * IMPORTANTE:
- * Todas estas rutas están aisladas por tenant automáticamente
- * gracias a TenantScope + TenantResolver.
+ * - role: Varía según la ruta (especificado por grupo)
  */
 
-Route::middleware(['auth', 'tenant.resolver', 'role:admin|supervisor'])
+Route::middleware(['auth', 'tenant.resolver'])
     ->prefix('tenant')
     ->name('tenant.')
     ->group(function () {
         
-        // Dashboard del tenant
-        Route::get('/dashboard', function () {
-            $tenant = app('tenant');
-            return view('tenant.dashboard', compact('tenant'));
-        })->name('dashboard');
+        /*
+        |--------------------------------------------------------------------------
+        | Dashboard (Todos los roles del tenant)
+        |--------------------------------------------------------------------------
+        */
+        Route::middleware('role:admin|supervisor|agent')->group(function () {
+            Route::get('/dashboard', function () {
+                $tenant = app('tenant');
+                return view('tenant.dashboard', compact('tenant'));
+            })->name('dashboard');
+        });
         
         /*
         |--------------------------------------------------------------------------
-        | Gestión de Bots
+        | Gestión de Bots (Solo admin y supervisor)
         |--------------------------------------------------------------------------
         */
-        Route::resource('bots', BotController::class);
+        Route::middleware('role:admin|supervisor')->group(function () {
+            Route::resource('bots', BotController::class);
 
-        // Acciones adicionales para bots
-        Route::prefix('bots')->name('bots.')->group(function () {
-            // Activar bot
-            Route::post('{bot}/activate', [BotController::class, 'activate'])
-                ->name('activate');
+            // Acciones adicionales para bots
+            Route::prefix('bots')->name('bots.')->group(function () {
+                // Activar bot
+                Route::post('{bot}/activate', [BotController::class, 'activate'])
+                    ->name('activate');
 
-            // Desactivar bot
-            Route::post('{bot}/deactivate', [BotController::class, 'deactivate'])
-                ->name('deactivate');
+                // Desactivar bot
+                Route::post('{bot}/deactivate', [BotController::class, 'deactivate'])
+                    ->name('deactivate');
+            });
         });
         
         // Gestionar usuarios del bot (Livewire) - Sprint futuro
@@ -59,7 +61,9 @@ Route::middleware(['auth', 'tenant.resolver', 'role:admin|supervisor'])
         // })->name('bots.manage-users');
 
         // Gestión de Usuarios del tenant - Sprint futuro
-        // Route::resource('users', Tenant\UserController::class);
+        // Route::middleware('role:admin')->group(function () {
+        //     Route::resource('users', Tenant\UserController::class);
+        // });
         
         // Knowledge Base - Sprint 3
         // Route::resource('bots/{bot}/knowledge-base', Tenant\KnowledgeBaseController::class);
@@ -68,5 +72,7 @@ Route::middleware(['auth', 'tenant.resolver', 'role:admin|supervisor'])
         // Route::get('analytics', [Tenant\AnalyticsController::class, 'index'])->name('analytics');
         
         // Billing y suscripción - Post-MVP
-        // Route::get('billing', [Tenant\BillingController::class, 'index'])->name('billing');
+        // Route::middleware('role:admin')->group(function () {
+        //     Route::get('billing', [Tenant\BillingController::class, 'index'])->name('billing');
+        // });
     });
